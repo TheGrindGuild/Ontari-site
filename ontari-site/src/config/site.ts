@@ -18,7 +18,7 @@ export const siteConfig = {
   // External links — swap these placeholders for the live URLs when ready
   links: {
     buy: "https://pump.fun/coin/9D7E8iCw8RmMjXnxVffQDAXLP8y6FCj9wCqPkogLpump",
-    dexscreener: "https://dexscreener.com/",
+    dexscreener: "https://dexscreener.com/solana/9D7E8iCw8RmMjXnxVffQDAXLP8y6FCj9wCqPkogLpump",
     twitter: "https://x.com/ontari_io",
   },
 
