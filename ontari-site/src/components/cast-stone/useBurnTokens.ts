@@ -44,10 +44,31 @@ export function useBurnTokens() {
         const decimals = siteConfig.solana.tokenDecimals;
 
         const senderAta = await getAssociatedTokenAddress(mint, publicKey);
+
+        // Check the wallet actually holds enough before asking for a signature —
+        // otherwise the transaction fails on-chain after the user already signed it.
+        let senderBalance = 0;
+        try {
+          const account = await getAccount(connection, senderAta);
+          senderBalance = Number(account.amount) / 10 ** decimals;
+        } catch {
+          senderBalance = 0;
+        }
+        if (senderBalance < amount) {
+          setError(
+            `You only hold ${senderBalance.toLocaleString()} ${siteConfig.tickerSymbol}, which isn't enough to burn ${amount.toLocaleString()}.`
+          );
+          setStatus("error");
+          return;
+        }
+
         const incineratorAta = await getAssociatedTokenAddress(mint, incinerator, true);
 
         const transaction = new Transaction();
 
+        // The incinerator address has no known private key, so it has never
+        // "logged in" to create its own token account — we may need to create
+        // it (funded by the sender) the first time anyone burns this token.
         const incineratorAccountInfo = await connection.getAccountInfo(incineratorAta);
         if (!incineratorAccountInfo) {
           transaction.add(
@@ -78,7 +99,19 @@ export function useBurnTokens() {
 
         setStatus("confirming");
         const latestBlockhash = await connection.getLatestBlockhash();
-        await connection.confirmTransaction({ signature: sig, ...latestBlockhash }, "confirmed");
+        const confirmation = await connection.confirmTransaction(
+          { signature: sig, ...latestBlockhash },
+          "confirmed"
+        );
+
+        // confirmTransaction resolves even when the transaction failed
+        // on-chain (e.g. insufficient funds) — the failure shows up here,
+        // not as a thrown error, so it has to be checked explicitly.
+        if (confirmation.value.err) {
+          throw new Error(
+            `Transaction landed but failed on-chain: ${JSON.stringify(confirmation.value.err)}`
+          );
+        }
 
         setSignature(sig);
         setStatus("success");
@@ -101,6 +134,8 @@ export function useBurnTokens() {
   return { burn, status, error, signature, reset };
 }
 
+// Re-exported so callers can sanity-check a wallet actually holds enough
+// balance before attempting a burn, giving a friendlier error than a failed tx.
 export async function getTokenBalance(
   connection: ReturnType<typeof useConnection>["connection"],
   owner: PublicKey
