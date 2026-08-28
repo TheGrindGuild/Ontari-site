@@ -19,7 +19,7 @@ function resultLabel(skips: number): string {
 
 export function CastStoneSection() {
   const { connected } = useWallet();
-  const { burn, status, error, reset } = useBurnTokens();
+  const { burn, status, error, signature, reset } = useBurnTokens();
 
   const [skips, setSkips] = useState<number | null>(null);
   const [playToken, setPlayToken] = useState(0);
@@ -129,23 +129,35 @@ export function CastStoneSection() {
                 <p className="text-xs text-[var(--color-red)]/90">{error}</p>
               )}
               {status === "success" && (
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="text-xs text-[var(--color-ivory)]/50 underline underline-offset-2"
-                >
-                  Burn again
-                </button>
+                <div className="flex flex-col items-center gap-1">
+                  {signature && (
+                    
+                      href={`https://solscan.io/tx/${signature}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[var(--color-ivory)]/70 underline underline-offset-2"
+                    >
+                      View burn on Solscan
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    onClick={reset}
+                    className="text-xs text-[var(--color-ivory)]/50 underline underline-offset-2"
+                  >
+                    Burn again
+                  </button>
+                </div>
               )}
             </div>
           )}
         </div>
 
         <p className="max-w-md text-xs leading-relaxed text-[var(--color-ivory)]/40">
-          Cast a Stone is cosmetic. The outcome carries no prize, no yield, and no bearing on
+          Casting a Stone is reflective. The outcome carries no tangible prize, no physical yield, and no bearing on
           {" "}{siteConfig.tickerSymbol}&rsquo;s value — it&rsquo;s a number the lake gives you, nothing more.
           Burned tokens are sent to a public, unrecoverable address and cannot be retrieved by
-          anyone, including the ONTARI.IO team.
+          anyone, including the ONTARI.IO team. 
         </p>
       </div>
     </section>
