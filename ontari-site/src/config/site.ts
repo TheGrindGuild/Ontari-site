@@ -22,6 +22,14 @@ export const siteConfig = {
     twitter: "https://x.com/ontari_io",
   },
 
+  // Solana / Cast a Stone game config
+  solana: {
+    tokenMintAddress: "9D7E8iCw8RmMjXnxVffQDAXLP8y6FCj9wCqPkogLpump",
+    tokenDecimals: 6,
+    incineratorAddress: "1nc1nerator11111111111111111111111111111111",
+    rpcEndpoint: "https://api.mainnet-beta.solana.com",
+  },
+
   // Legal
   disclaimer:
     "$ONTARI is a meme coin created for entertainment and cultural satire. It has no guaranteed value or expectation of profit.",
