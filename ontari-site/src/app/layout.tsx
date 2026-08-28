@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
+import { SolanaWalletProvider } from "@/components/solana/SolanaWalletProvider";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -33,7 +34,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${fraunces.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <SolanaWalletProvider>{children}</SolanaWalletProvider>
+      </body>
     </html>
   );
 }
