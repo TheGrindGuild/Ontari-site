@@ -13,11 +13,11 @@ export const siteConfig = {
   proclamation: ["THE MEME IS BEAUTIFUL.", "THE MEME IS BIG."],
 
   // Token
-  tokenContractAddress: "REPLACE_WITH_TOKEN_CONTRACT_ADDRESS",
+  tokenContractAddress: "9D7E8iCw8RmMjXnxVffQDAXLP8y6FCj9wCqPkogLpump",
 
   // External links — swap these placeholders for the live URLs when ready
   links: {
-    buy: "https://your-buy-link.example.com",
+    buy: "https://pump.fun/coin/9D7E8iCw8RmMjXnxVffQDAXLP8y6FCj9wCqPkogLpump",
     dexscreener: "https://dexscreener.com/",
     twitter: "https://x.com/ontari_io",
   },
