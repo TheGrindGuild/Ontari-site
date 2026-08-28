@@ -27,7 +27,7 @@ export const siteConfig = {
     tokenMintAddress: "9D7E8iCw8RmMjXnxVffQDAXLP8y6FCj9wCqPkogLpump",
     tokenDecimals: 6,
     incineratorAddress: "1nc1nerator11111111111111111111111111111111",
-    rpcEndpoint: "https://api.mainnet-beta.solana.com",
+    rpcEndpoint: "https://mainnet.helius-rpc.com/?api-key=54fa1198-26ed-4d2a-8c10-15d33c4411a3",
   },
 
   // Legal
