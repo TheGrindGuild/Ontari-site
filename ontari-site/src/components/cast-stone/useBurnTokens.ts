@@ -8,10 +8,28 @@ import {
   createTransferCheckedInstruction,
   getAssociatedTokenAddress,
   getAccount,
+  TOKEN_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
 } from "@solana/spl-token";
 import { siteConfig } from "@/config/site";
 
 type BurnStatus = "idle" | "building" | "awaiting-signature" | "confirming" | "success" | "error";
+
+// Solana has two token standards: the classic SPL Token program and the
+// newer Token-2022 program. A mint's account is *owned* by whichever
+// program created it — so the mint account's owner tells us which one to
+// use everywhere else (ATA derivation, transfers, etc). Getting this wrong
+// silently computes the wrong account address entirely.
+async function resolveTokenProgramId(
+  connection: ReturnType<typeof useConnection>["connection"],
+  mint: PublicKey
+): Promise<PublicKey> {
+  const mintAccountInfo = await connection.getAccountInfo(mint);
+  if (mintAccountInfo?.owner.equals(TOKEN_2022_PROGRAM_ID)) {
+    return TOKEN_2022_PROGRAM_ID;
+  }
+  return TOKEN_PROGRAM_ID;
+}
 
 export function useBurnTokens() {
   const { connection } = useConnection();
@@ -42,14 +60,20 @@ export function useBurnTokens() {
         const mint = new PublicKey(siteConfig.solana.tokenMintAddress);
         const incinerator = new PublicKey(siteConfig.solana.incineratorAddress);
         const decimals = siteConfig.solana.tokenDecimals;
+        const programId = await resolveTokenProgramId(connection, mint);
 
-        const senderAta = await getAssociatedTokenAddress(mint, publicKey);
+        const senderAta = await getAssociatedTokenAddress(
+          mint,
+          publicKey,
+          false,
+          programId
+        );
 
         // Check the wallet actually holds enough before asking for a signature —
         // otherwise the transaction fails on-chain after the user already signed it.
         let senderBalance = 0;
         try {
-          const account = await getAccount(connection, senderAta);
+          const account = await getAccount(connection, senderAta, undefined, programId);
           senderBalance = Number(account.amount) / 10 ** decimals;
         } catch {
           senderBalance = 0;
@@ -62,7 +86,12 @@ export function useBurnTokens() {
           return;
         }
 
-        const incineratorAta = await getAssociatedTokenAddress(mint, incinerator, true);
+        const incineratorAta = await getAssociatedTokenAddress(
+          mint,
+          incinerator,
+          true,
+          programId
+        );
 
         const transaction = new Transaction();
 
@@ -76,7 +105,8 @@ export function useBurnTokens() {
               publicKey,
               incineratorAta,
               incinerator,
-              mint
+              mint,
+              programId
             )
           );
         }
@@ -90,7 +120,9 @@ export function useBurnTokens() {
             incineratorAta,
             publicKey,
             rawAmount,
-            decimals
+            decimals,
+            [],
+            programId
           )
         );
 
@@ -141,9 +173,10 @@ export async function getTokenBalance(
   owner: PublicKey
 ): Promise<number> {
   const mint = new PublicKey(siteConfig.solana.tokenMintAddress);
-  const ata = await getAssociatedTokenAddress(mint, owner);
+  const programId = await resolveTokenProgramId(connection, mint);
+  const ata = await getAssociatedTokenAddress(mint, owner, false, programId);
   try {
-    const account = await getAccount(connection, ata);
+    const account = await getAccount(connection, ata, undefined, programId);
     return Number(account.amount) / 10 ** siteConfig.solana.tokenDecimals;
   } catch {
     return 0;
