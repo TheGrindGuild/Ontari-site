@@ -156,8 +156,8 @@ export function CastStoneSection() {
         <p className="max-w-md text-xs leading-relaxed text-[var(--color-ivory)]/40">
           Casting a Stone is reflective. The outcome carries no tangible prize, no physical yield, and no bearing on
           {" "}{siteConfig.tickerSymbol}&rsquo;s value — it&rsquo;s a number the lake gives you, nothing more.
-          Burned tokens are sent to a public, unrecoverable address and cannot be retrieved by
-          anyone, including the ONTARI.IO team. 
+          Burned tokens are permanently destroyed using Solana&rsquo;s token burn instruction,
+          reducing {siteConfig.tickerSymbol}&rsquo;s total supply. This cannot be reversed by
         </p>
       </div>
     </section>
