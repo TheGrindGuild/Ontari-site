@@ -27,6 +27,8 @@ export function CastStoneSection() {
   const [animating, setAnimating] = useState(false);
 
   const rollSkips = useCallback(() => {
+    // Cosmetic-only randomness — nothing of value depends on this outcome,
+    // so Math.random is perfectly fine here (no fairness/audit requirement).
     return Math.floor(Math.random() * 75) + 1;
   }, []);
 
@@ -56,6 +58,7 @@ export function CastStoneSection() {
           lake doesn&rsquo;t care which.
         </p>
 
+        {/* Video + animation stage */}
         <div className="relative aspect-video w-full overflow-hidden rounded-sm border border-[var(--color-ivory)]/15">
           <video
             className="absolute inset-0 h-full w-full object-cover"
@@ -84,6 +87,7 @@ export function CastStoneSection() {
           )}
         </div>
 
+        {/* Free cast */}
         <button
           type="button"
           onClick={cast}
@@ -93,6 +97,7 @@ export function CastStoneSection() {
           {animating ? "The stone is in the air..." : "Cast a Free Stone"}
         </button>
 
+        {/* Burn cast */}
         <div className="mt-6 flex w-full max-w-md flex-col items-center gap-4 border-t border-[var(--color-ivory)]/15 pt-8">
           <p className="eyebrow text-xs text-[var(--color-ivory)]/50">
             Or burn {siteConfig.tickerSymbol} for the same odds, permanently
@@ -154,10 +159,11 @@ export function CastStoneSection() {
         </div>
 
         <p className="max-w-md text-xs leading-relaxed text-[var(--color-ivory)]/40">
-          Casting a Stone is reflective. The outcome carries no tangible prize, no physical yield, and no bearing on
+          Cast a Stone is cosmetic. The outcome carries no prize, no yield, and no bearing on
           {" "}{siteConfig.tickerSymbol}&rsquo;s value — it&rsquo;s a number the lake gives you, nothing more.
           Burned tokens are permanently destroyed using Solana&rsquo;s token burn instruction,
           reducing {siteConfig.tickerSymbol}&rsquo;s total supply. This cannot be reversed by
+          anyone, including the ONTARI.IO team.
         </p>
       </div>
     </section>
