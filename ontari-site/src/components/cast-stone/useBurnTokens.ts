@@ -9,6 +9,8 @@ import {
   getAccount,
   TOKEN_PROGRAM_ID,
   TOKEN_2022_PROGRAM_ID,
+  TokenAccountNotFoundError,
+  TokenInvalidAccountOwnerError,
 } from "@solana/spl-token";
 import { siteConfig } from "@/config/site";
 
@@ -28,6 +30,31 @@ async function resolveTokenProgramId(
     return TOKEN_2022_PROGRAM_ID;
   }
   return TOKEN_PROGRAM_ID;
+}
+
+// getAccount throws TokenAccountNotFoundError when a wallet genuinely has
+// never held this token (a real "balance is 0"). Any OTHER error — a bad
+// RPC endpoint, a rate limit, a network blip — is a different problem and
+// must not be reported to the user as "you hold 0", which is misleading.
+async function fetchTokenBalance(
+  connection: ReturnType<typeof useConnection>["connection"],
+  ata: PublicKey,
+  programId: PublicKey,
+  decimals: number
+): Promise<number> {
+  try {
+    const account = await getAccount(connection, ata, undefined, programId);
+    return Number(account.amount) / 10 ** decimals;
+  } catch (err) {
+    if (err instanceof TokenAccountNotFoundError || err instanceof TokenInvalidAccountOwnerError) {
+      return 0;
+    }
+    throw new Error(
+      `Couldn't check your ${siteConfig.tickerSymbol} balance (RPC error): ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+  }
 }
 
 export function useBurnTokens() {
@@ -69,13 +96,7 @@ export function useBurnTokens() {
 
         // Check the wallet actually holds enough before asking for a signature —
         // otherwise the transaction fails on-chain after the user already signed it.
-        let senderBalance = 0;
-        try {
-          const account = await getAccount(connection, senderAta, undefined, programId);
-          senderBalance = Number(account.amount) / 10 ** decimals;
-        } catch {
-          senderBalance = 0;
-        }
+        const senderBalance = await fetchTokenBalance(connection, senderAta, programId, decimals);
         if (senderBalance < amount) {
           setError(
             `You only hold ${senderBalance.toLocaleString()} ${siteConfig.tickerSymbol}, which isn't enough to burn ${amount.toLocaleString()}.`
@@ -149,10 +170,5 @@ export async function getTokenBalance(
   const mint = new PublicKey(siteConfig.solana.tokenMintAddress);
   const programId = await resolveTokenProgramId(connection, mint);
   const ata = await getAssociatedTokenAddress(mint, owner, false, programId);
-  try {
-    const account = await getAccount(connection, ata, undefined, programId);
-    return Number(account.amount) / 10 ** siteConfig.solana.tokenDecimals;
-  } catch {
-    return 0;
-  }
+  return fetchTokenBalance(connection, ata, programId, siteConfig.solana.tokenDecimals);
 }
