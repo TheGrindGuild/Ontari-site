@@ -4,8 +4,7 @@ import { useCallback, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import {
-  createAssociatedTokenAccountInstruction,
-  createTransferCheckedInstruction,
+  createBurnCheckedInstruction,
   getAssociatedTokenAddress,
   getAccount,
   TOKEN_PROGRAM_ID,
@@ -18,8 +17,8 @@ type BurnStatus = "idle" | "building" | "awaiting-signature" | "confirming" | "s
 // Solana has two token standards: the classic SPL Token program and the
 // newer Token-2022 program. A mint's account is *owned* by whichever
 // program created it — so the mint account's owner tells us which one to
-// use everywhere else (ATA derivation, transfers, etc). Getting this wrong
-// silently computes the wrong account address entirely.
+// use everywhere else (ATA derivation, instructions, etc). Getting this
+// wrong silently computes the wrong account address entirely.
 async function resolveTokenProgramId(
   connection: ReturnType<typeof useConnection>["connection"],
   mint: PublicKey
@@ -58,7 +57,6 @@ export function useBurnTokens() {
         setStatus("building");
 
         const mint = new PublicKey(siteConfig.solana.tokenMintAddress);
-        const incinerator = new PublicKey(siteConfig.solana.incineratorAddress);
         const decimals = siteConfig.solana.tokenDecimals;
         const programId = await resolveTokenProgramId(connection, mint);
 
@@ -86,38 +84,14 @@ export function useBurnTokens() {
           return;
         }
 
-        const incineratorAta = await getAssociatedTokenAddress(
-          mint,
-          incinerator,
-          true,
-          programId
-        );
-
-        const transaction = new Transaction();
-
-        // The incinerator address has no known private key, so it has never
-        // "logged in" to create its own token account — we may need to create
-        // it (funded by the sender) the first time anyone burns this token.
-        const incineratorAccountInfo = await connection.getAccountInfo(incineratorAta);
-        if (!incineratorAccountInfo) {
-          transaction.add(
-            createAssociatedTokenAccountInstruction(
-              publicKey,
-              incineratorAta,
-              incinerator,
-              mint,
-              programId
-            )
-          );
-        }
-
         const rawAmount = BigInt(Math.round(amount * 10 ** decimals));
 
-        transaction.add(
-          createTransferCheckedInstruction(
+        // The real Burn instruction — this reduces the mint's total supply
+        // directly, rather than moving tokens to a dead wallet.
+        const transaction = new Transaction().add(
+          createBurnCheckedInstruction(
             senderAta,
             mint,
-            incineratorAta,
             publicKey,
             rawAmount,
             decimals,
