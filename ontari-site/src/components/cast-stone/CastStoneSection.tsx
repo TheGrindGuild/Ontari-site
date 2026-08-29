@@ -136,12 +136,7 @@ export function CastStoneSection() {
               {status === "success" && (
                 <div className="flex flex-col items-center gap-1">
                   {signature && (
-                    
-                      href={`https://solscan.io/tx/${signature}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-[var(--color-ivory)]/70 underline underline-offset-2"
-                    >
+                    <a href={`https://solscan.io/tx/${signature}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--color-ivory)]/70 underline underline-offset-2">
                       View burn on Solscan
                     </a>
                   )}
