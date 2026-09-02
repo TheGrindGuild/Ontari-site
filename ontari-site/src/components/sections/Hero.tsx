@@ -1,10 +1,23 @@
 import { siteConfig } from "@/config/site";
 import { ContourLines } from "@/components/ContourLines";
 import { LinkButton } from "@/components/LinkButton";
+import { AnecdoteCard } from "@/components/anecdotes/AnecdoteCard";
+import { getRandomAnecdote } from "@/lib/anecdotes";
 
-export function Hero() {
+export async function Hero() {
+  // Fetched fresh on every request (this is a Server Component, not cached),
+  // so each page load can surface a different community entry.
+  let randomEntry = null;
+  try {
+    randomEntry = await getRandomAnecdote();
+  } catch (err) {
+    // If KV isn't configured yet (e.g. right after first deploy, before the
+    // storage add-ons are connected), fail quietly rather than break the page.
+    console.error("Could not load a random anecdote:", err);
+  }
+
   return (
-    <section className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-[var(--color-lake)] px-6 text-[var(--color-ivory)]">
+    <section className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-[var(--color-lake)] px-6 py-24 text-[var(--color-ivory)]">
       <div className="grain" />
       <ContourLines
         variant="dark"
@@ -37,6 +50,18 @@ export function Hero() {
             X / Twitter
           </LinkButton>
         </div>
+
+        {randomEntry && (
+          <div className="mt-10 w-full max-w-sm">
+            <p className="eyebrow mb-3 text-[10px] text-[var(--color-ivory)]/50">
+              From someone who was here
+            </p>
+            <AnecdoteCard entry={randomEntry} />
+            <a href="#share-your-ontario" className="mt-3 inline-block text-xs text-[var(--color-ivory)]/50 underline underline-offset-2">
+              Share your own
+            </a>
+          </div>
+        )}
       </div>
     </section>
   );
