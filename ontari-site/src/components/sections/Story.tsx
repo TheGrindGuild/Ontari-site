@@ -37,6 +37,12 @@ export function Story() {
           </ScrollReveal>
         </div>
 
+        <ScrollReveal delayMs={300}>
+          <a href="https://x.com/CanadianPM/status/2093097744847999464" target="_blank" rel="noopener noreferrer" className="inline-block text-sm text-[var(--color-lake)]/60 underline underline-offset-4 transition-colors hover:text-[var(--color-lake)]">
+            Even the Prime Minister said so.
+          </a>
+        </ScrollReveal>
+
         <ScrollReveal delayMs={340}>
           <p className="font-display text-5xl font-medium tracking-tight text-[var(--color-red)] sm:text-6xl">
             So we made the meme.
