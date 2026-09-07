@@ -43,11 +43,11 @@ export async function Hero() {
         </p>
 
         <div className="mt-4 flex flex-col gap-4 sm:flex-row">
-          <LinkButton href={siteConfig.links.buy} variant="solid-ivory">
-            Buy {siteConfig.tickerSymbol}
+          <LinkButton href="#the-story" variant="solid-ivory">
+            Read the Story
           </LinkButton>
-          <LinkButton href={siteConfig.links.twitter} variant="outline-ivory">
-            X / Twitter
+          <LinkButton href="#share-your-ontario" variant="outline-ivory">
+            Share Your Ontario
           </LinkButton>
         </div>
 

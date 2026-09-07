@@ -3,7 +3,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 
 export function Story() {
   return (
-    <section className="relative overflow-hidden bg-[var(--color-ivory)] px-6 py-32 sm:py-44">
+    <section id="the-story" className="relative scroll-mt-8 overflow-hidden bg-[var(--color-ivory)] px-6 py-32 sm:py-44">
       <ContourLines
         variant="light"
         className="pointer-events-none absolute inset-0 h-full w-full opacity-40"
